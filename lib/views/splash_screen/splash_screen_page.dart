@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:word_explorer/utils/contants/app_assets.dart';
 import 'package:word_explorer/utils/contants/app_theme.dart';
+import 'package:word_explorer/views/onboarding/onboarding_page.dart';
 
 class SplashScreenPage extends StatefulWidget {
   const SplashScreenPage({super.key});
@@ -9,6 +10,26 @@ class SplashScreenPage extends StatefulWidget {
 }
 
 class _SplashScreenPageState extends State<SplashScreenPage> {
+  Future<void> changePageAfterDelay() async {
+    await Future.delayed(const Duration(seconds: 2));
+    changePage();
+  }
+
+  void changePage() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const OnboardingPage(),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    changePageAfterDelay();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
