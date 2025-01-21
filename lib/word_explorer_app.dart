@@ -19,7 +19,7 @@ class WordExplorerApp extends StatelessWidget {
         elevatedButtonTheme: AppThemes.elevatedButtonThemeData,
         inputDecorationTheme: AppThemes.inputDecorationTheme,
       ),
-      home: SplashScreenPage(),
+      home: const SplashScreenPage(),
     );
   }
 }
