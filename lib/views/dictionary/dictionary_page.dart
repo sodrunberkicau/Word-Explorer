@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:word_explorer/viewmodels/word_viewmodel.dart';
 import 'package:word_explorer/utils/contants/app_assets.dart';
 import 'package:word_explorer/utils/contants/app_theme.dart';
+
 import 'package:word_explorer/widgets/search_word_initial.dart';
 import 'package:word_explorer/widgets/search_word_not_found.dart';
 import 'package:word_explorer/widgets/search_word_results.dart';
@@ -66,6 +69,9 @@ class _DictionaryPageState extends State<DictionaryPage> {
                     searchQuery = value;
                   });
                 },
+                onFieldSubmitted: (_) {
+                  context.read<WordViewModel>().searchWord(searchQuery);
+                },
                 decoration: const InputDecoration()
                     .applyDefaults(Theme.of(context).inputDecorationTheme)
                     .copyWith(
@@ -95,6 +101,7 @@ class _DictionaryPageState extends State<DictionaryPage> {
                             setState(() {
                               searchQuery = '';
                             });
+                            context.read<WordViewModel>().resetSearch();
                           },
                           icon: Icon(
                             Icons.close,
@@ -104,15 +111,29 @@ class _DictionaryPageState extends State<DictionaryPage> {
                       ),
                     ),
               ),
-
-              // const SearchWordInitial()
-              const SearchWordResults()
-              // SearchWordNotFound(
-              //   onPressed: () {
-              //     searchTextEditingController.clear();
-              //     searchFocusNode.requestFocus();
-              //   },
-              // )
+              Consumer<WordViewModel>(
+                builder: (context, viewModel, child) {
+                  return switch (viewModel.state) {
+                    WordState.initial => const SearchWordInitial(),
+                    WordState.loading => const Padding(
+                        padding: EdgeInsets.only(top: 300.0),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    WordState.success => SearchWordResults(
+                        wordData: viewModel.wordData!,
+                      ),
+                    WordState.error => SearchWordNotFound(
+                        onPressed: () {
+                          searchTextEditingController.clear();
+                          searchFocusNode.requestFocus();
+                          context.read<WordViewModel>().resetSearch();
+                        },
+                      ),
+                  };
+                },
+              ),
             ],
           ),
         ),
