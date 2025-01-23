@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:word_explorer/models/word_model.dart';
+import 'package:word_explorer/utils/audio_player_utils/audio_player_utils.dart';
 import 'package:word_explorer/utils/contants/app_theme.dart';
 
 class SearchWordResults extends StatelessWidget {
-  const SearchWordResults({super.key});
+  const SearchWordResults({super.key, required this.wordData});
+
+  final WordModel wordData;
 
   @override
   Widget build(BuildContext context) {
@@ -22,50 +26,58 @@ class SearchWordResults extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'religion',
+              wordData.word ?? '-',
               style: AppThemes.textTheme.headlineMedium,
             ),
             const SizedBox(height: 9),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Text(
-                    "/ɹɪˈlɪdʒən/",
-                    style: AppThemes.textTheme.headlineSmall?.copyWith(
-                      color: AppThemes.colorScheme.primary,
-                      fontFamily: AppThemes.vocesFontFamily,
-                      fontWeight: FontWeight.normal,
+            Visibility(
+              visible: wordData.phonetic != null &&
+                  wordData.phonetics?.first != null,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      wordData.phonetic ?? '-',
+                      style: AppThemes.textTheme.headlineSmall?.copyWith(
+                        color: AppThemes.colorScheme.primary,
+                        fontFamily: AppThemes.vocesFontFamily,
+                        fontWeight: FontWeight.normal,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.volume_up,
-                      color: AppThemes.colorScheme.primary,
-                    ))
-              ],
+                  Visibility(
+                    visible: wordData.phonetics?.first.audio != null &&
+                        wordData.phonetics?.first.audio != '',
+                    child: IconButton(
+                        onPressed: () {
+                          debugPrint(
+                              'audio Url: ${wordData.phonetics?.first.audio}');
+
+                          AudioPlayerUtils.play(
+                              wordData.phonetics!.first.audio!);
+                        },
+                        icon: Icon(
+                          Icons.volume_up,
+                          color: AppThemes.colorScheme.primary,
+                        )),
+                  )
+                ],
+              ),
             ),
             Divider(
               color: AppThemes.colorScheme.outlineVariant,
               thickness: 1,
             ),
-            const TileSearchWordResult(
-              title: "Noun Definition",
-              body:
-                  "Belief in a spiritual or metaphysical reality (often including at least one deity), accompanied by practices or rituals pertaining to the belief.",
-              isHasSynonym: true,
-              isHasAntonym: true,
-              listSynonyms: ["faith", "faith", "superstition"],
-              listAntonyms: ["coba"],
-            ),
-            const TileSearchWordResult(
-              title: "Verb Definition",
-              body: "Engage in religious practice",
-              listSynonyms: [],
-              listAntonyms: [],
-              isShowDivider: false,
+            ...wordData.meanings!.map(
+              (meaning) => TileSearchWordResult(
+                title: "${meaning.partOfSpeech?.toUpperCase()} Definition",
+                body: meaning.definitions?.first.definition ?? '-',
+                isHasSynonym: meaning.synonyms?.isNotEmpty ?? false,
+                isHasAntonym: meaning.antonyms?.isNotEmpty ?? false,
+                listSynonyms: meaning.synonyms ?? [],
+                listAntonyms: meaning.antonyms ?? [],
+              ),
             ),
           ],
         ));
